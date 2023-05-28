@@ -6,15 +6,10 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 
 //var cloths = require('./black.json')
-<<<<<<< HEAD
-import cloths from "./black.json";
-import axios from "axios";
-=======
 import cloths from './black.json'
 import axios from 'axios';
 
 
->>>>>>> 37bcbc145bb8690f5e9a9b7f688d929f595d4a45
 
 function Home(props) {
   const [data, setData] = useState([]);
