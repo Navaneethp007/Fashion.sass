@@ -7,6 +7,7 @@ import { useState } from 'react';
  
 //var cloths = require('./black.json')
 import cloths from './black.json'
+import axios from 'axios';
 
 
 
@@ -47,7 +48,9 @@ function Home(props) {
       await console.log(selected)
 
       await console.log(sub)
-      alert("heloo")
+
+      // alert("heloo")
+      axios.post("")
     }
 
 
