@@ -4,8 +4,9 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import List, Dict
+from flask import Flask, request  # Import flask
 
-data=pd.read_csv('Clothes.csv')
+app = Flask(__name__)  # Setup the flask app by creating an instance of Flask
 def find_similarity(data, newCol):
     # insert a new column in the data df
     if newCol != '':
@@ -20,6 +21,8 @@ def find_similarity(data, newCol):
     
 
     tfidf = TfidfVectorizer(analyzer='word', stop_words='english')
+    for i in range(len(data)):
+        data['Description'].iloc[i] = ' '.join(sorted(list(set(data['Description'].iloc[i].split(' ')))))
     desc = tfidf.fit_transform(data['Description'])
     sim = cosine_similarity(desc) 
     csims = {}
@@ -29,7 +32,6 @@ def find_similarity(data, newCol):
 
     return csims
 
-csims = find_similarity(data, '')
         
 class Recommender:
     def __init__(self, matrix):
@@ -46,44 +48,89 @@ class Recommender:
         
     def recommend(self, recommendation):
         des = recommendation['des']
-        des = ' '.join(list(set(' '.join(des).split(' '))))
+        des = ' '.join(sorted(list(set(' '.join(des).split(' ')))))
         if(des not in data['Description'].values):
 
             csims=find_similarity(data, des)
             self.matrix_similar = csims
         # print(self.matrix_similar.last())
         number_items = recommendation['number_items']
-        re_des = self.matrix_similar[des][:number_items]
+        re_des = self.matrix_similar[des][1:number_items+1]
+        # re_des = []
+        # lis_id = []
+
+        # for i in range(len(self.matrix_similar[des])):
+        #     if self.matrix_similar[des][i][0] !=1:
+        #         id = data.loc[data['Description'] == self.matrix_similar[des][i][1]]['Id'].values[0]
+        #         # print(id)
+        #         if id>60:
+        #             continue
+        #         lis_id.append(id)
+        #         re_des.append(self.matrix_similar[des][i])
+
+        #     if(len(re_des) == number_items):
+        #         break
+
         self._print_message(des=des, re_des=re_des)
-recommedations = Recommender(csims)
+        # return lis_id
+
+
+@app.route('/')  # When someone goes to / on the server, execute the following function
+def home():
+    return 'Hello, World!'  # Return this message back to the browser
+
+@app.route('/dressSelect', methods=['POST'])
+def dressSelect():
+# if request.method == 'POST':
+    list = request.get_json()
+    print(list)
                                          
-recommendation = {
-    "des": [data['Description'].iloc[4], data['Description'].iloc[5]],
-    "number_items": 3 
-}
+    recommendation = {
+        "ids": [int(i) for i in list['dress']],   
+        "des": [data['Description'].iloc[int(i)] for i in list['dress']],
+        "number_items": 4-len(list['dress'])
+    }
 
-recommedations.recommend(recommendation)
+    lis_id=recommedations.recommend(recommendation)
+    return 'Hello World'
+    # lis_id = [str(i) for i in lis_id]
+
+    # return {
+    #     "id": lis_id
+    # }  # Return this message back to the browser
+
+
+
+if __name__ == '__main__':  # If the script that was run is this script (we have not been imported)
+    data=pd.read_csv('Clothes.csv')
+    csims = find_similarity(data, '')
+    recommedations = Recommender(csims)
+    app.run()  # Start the server
+
+
+
+
+    
+                                     
+# recommendation = {
+#     "des": [data['Description'].iloc[3], data['Description'].iloc[8]],
+#     "number_items": 3 
+# }
+
+# recommedations.recommend(recommendation)
 
                                      
-recommendation = {
-    "des": [data['Description'].iloc[3], data['Description'].iloc[8]],
-    "number_items": 3 
-}
+# recommendation = {
+#     "des": [data['Description'].iloc[2], data['Description'].iloc[4]],
+#     "number_items": 3 
+# }
 
-recommedations.recommend(recommendation)
-
-                                     
-recommendation = {
-    "des": [data['Description'].iloc[2], data['Description'].iloc[4]],
-    "number_items": 3 
-}
-
-recommedations.recommend(recommendation)
+# recommedations.recommend(recommendation)
 
                                      
-recommendation = {
-    "des": [data['Description'].iloc[1], data['Description'].iloc[10]],
-    "number_items": 3 
-}
+# recommendation = {
+#     "des": [data['Description'].iloc[1], data['Description'].iloc[10]],
+#     "number_items": 3 
+# }
 
-recommedations.recommend(recommendation)
+# recommedations.recommend(recommendation)
