@@ -6,13 +6,18 @@ from sklearn.metrics.pairwise import cosine_similarity
 from typing import List, Dict
 
 data=pd.read_csv('Clothes.csv')
-tfidf = TfidfVectorizer(analyzer='word', stop_words='english')
-desc = tfidf.fit_transform(data['Category'])
-sim = cosine_similarity(desc) 
-csims = {}
-for i in range(len(sim)):
-    sim_ind = sim[i].argsort()[:-50:-1] 
-    csims[data['Description'].iloc[i]] = [(sim[i][x], data['Description'][x]) for x in sim_ind]
+def find_similarity(self, data, newCol):
+    # insert a new row in the data df
+    if newCol not in data.columns:
+        data = data.append(newCol, ignore_index=True)
+
+    tfidf = TfidfVectorizer(analyzer='word', stop_words='english')
+    desc = tfidf.fit_transform(data['Description'])
+    sim = cosine_similarity(desc) 
+    csims = {}
+    for i in range(len(sim)):
+        sim_ind = sim[i].argsort()[:-50:-1] 
+        csims[data['Description'].iloc[i]] = [(sim[i][x], data['Description'][x]) for x in sim_ind]
                                 
 class Recommender:
     def __init__(self, matrix):
@@ -35,7 +40,7 @@ class Recommender:
 recommedations = Recommender(csims)
                                          
 recommendation = {
-    "des": data['Description'].iloc[12],
+    "des": [data['Description'].iloc[4], data['Description'].iloc[5]],
     "number_items": 3 
 }
 
