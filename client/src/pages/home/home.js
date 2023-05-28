@@ -59,10 +59,8 @@ function Home(props) {
     setReload((prev) => !prev);
     //alert("heloo")
     //alert(dress:JSON.stringify(selected));
-  };
-
-  axios
-    .post("/api/", {
+    axios
+    .post("http://127.0.0.1:5000/dressSelect", {
       dress:JSON.stringify(selected),
     })
     .then(function (response) {
@@ -72,6 +70,9 @@ function Home(props) {
     .catch(function (error) {
       console.log(error);
     });
+  };
+
+  
 
   return (
     <div>
@@ -118,15 +119,16 @@ function Home(props) {
         <button onClick={(e) => handlesubmit(e)}>Submit</button>
       </form>
       <Container>
-        {res.map((item) => {
+        {res!=null?(res.map((item) => {
+          console.log(item);
           return (
             <Row>
               <Col>
-                <img src={item.path} className="image" />
+                <img src={item!=null?item.path:0} className="image" />
               </Col>
             </Row>
           );
-        })}
+        })):null}
       </Container>
     </div>
   );
