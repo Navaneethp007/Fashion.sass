@@ -7,6 +7,7 @@ from typing import List, Dict
 from flask import Flask, request  # Import flask
 
 app = Flask(__name__)  # Setup the flask app by creating an instance of Flask
+desc_to_id = {}
 def find_similarity(data, newCol):
     # insert a new column in the data df
     if newCol != '':
@@ -23,6 +24,8 @@ def find_similarity(data, newCol):
     tfidf = TfidfVectorizer(analyzer='word', stop_words='english')
     for i in range(len(data)):
         data['Description'].iloc[i] = ' '.join(sorted(list(set(data['Description'].iloc[i].split(' ')))))
+        desc_to_id[data['Description'].iloc[i]] = data['Id'].iloc[i]
+
     desc = tfidf.fit_transform(data['Description'])
     sim = cosine_similarity(desc) 
     csims = {}
@@ -55,11 +58,15 @@ class Recommender:
             self.matrix_similar = csims
         # print(self.matrix_similar.last())
         number_items = recommendation['number_items']
-        re_des = self.matrix_similar[des][1:number_items+1]
-        # re_des = []
-        # lis_id = []
+        re_des = []
+        lis_id = []
+        # re_des = self.matrix_similar[des][1:number_items+1]
 
-        # for i in range(len(self.matrix_similar[des])):
+        for i in range(1, len(self.matrix_similar[des])):
+            id = desc_to_id[self.matrix_similar[des][i][1]]
+            if id<60:
+                re_des.append(self.matrix_similar[des][i])
+                lis_id.append(id+1)
         #     if self.matrix_similar[des][i][0] !=1:
         #         id = data.loc[data['Description'] == self.matrix_similar[des][i][1]]['Id'].values[0]
         #         # print(id)
@@ -68,11 +75,11 @@ class Recommender:
         #         lis_id.append(id)
         #         re_des.append(self.matrix_similar[des][i])
 
-        #     if(len(re_des) == number_items):
-        #         break
+            if(len(re_des) == number_items):
+                break
 
         self._print_message(des=des, re_des=re_des)
-        # return lis_id
+        return lis_id
 
 
 @app.route('/')  # When someone goes to / on the server, execute the following function
@@ -86,18 +93,18 @@ def dressSelect():
     print(list)
                                          
     recommendation = {
-        "ids": [int(i) for i in list['dress']],   
-        "des": [data['Description'].iloc[int(i)] for i in list['dress']],
+        # "ids": [int(i)-1 for i in list],   
+        "des": [data['Description'].iloc[int(i)-1] for i in list['dress']],
         "number_items": 4-len(list['dress'])
     }
 
     lis_id=recommedations.recommend(recommendation)
-    return 'Hello World'
-    # lis_id = [str(i) for i in lis_id]
+    # return 'Hello World'
+    lis_id = [str(i) for i in lis_id]
 
-    # return {
-    #     "id": lis_id
-    # }  # Return this message back to the browser
+    return {
+        "id": lis_id
+    }  # Return this message back to the browser
 
 
 
