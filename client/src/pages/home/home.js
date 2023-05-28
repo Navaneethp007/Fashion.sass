@@ -56,20 +56,20 @@ function Home(props) {
     await console.log(sub);
     setReload((prev) => !prev);
     //alert("heloo")
-  alert(dress:JSON.stringify(selected));
+    //alert(dress:JSON.stringify(selected));
+    var Xdata = {
+      dress: JSON.stringify(selected),
+    };
+    await axios
+      .post("http://127.0.0.1:5000/dressSelect", Xdata)
+      .then(function (response) {
+        console.log(response);
+        setres(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   };
-
-  axios
-    .post("/api/", {
-      dress:JSON.stringify(selected),
-    })
-    .then(function (response) {
-      console.log(response);
-      setres(response);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
 
   return (
     <div>
@@ -116,15 +116,18 @@ function Home(props) {
         <button onClick={(e) => handlesubmit(e)}>Submit</button>
       </form>
       <Container>
-        {res.map((item) => {
-          return (
-            <Row>
-              <Col>
-                <img src={item.path} className="image" />
-              </Col>
-            </Row>
-          );
-        })}
+        {res != null
+          ? res.map((item) => {
+              console.log(item);
+              return (
+                <Row>
+                  <Col>
+                    <img src={item != null ? item.path : 0} className="image" />
+                  </Col>
+                </Row>
+              );
+            })
+          : null}
       </Container>
     </div>
   );
